@@ -3,10 +3,15 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "react": "^16.10.1",
-    "react-dom": "^16.10.1",
-    "react-router-dom": "^5.1.1",
+    "classnames": "^2.2.6",
+    "date-fns": "^2.6.0",
+    "react": "^16.10.2",
+    "react-countup": "^3.0.3",
+    "react-dom": "^16.10.2",
+    "react-redux": "^7.1.1",
+    "react-router-dom": "^5.1.2",
     "react-scripts": "3.1.2",
+    "redux": "^4.0.4",
     "tachyons": "^4.11.1"
   },
   "scripts": {

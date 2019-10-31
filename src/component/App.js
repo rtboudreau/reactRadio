@@ -1,91 +1,39 @@
-/*global Mixcloud*/
 import React, {Component} from 'react';
 import {BrowserRouter as Router, Route, Link} from 'react-router-dom';
+import {connect} from 'react-redux';
 
 import FeaturedMix from './FeaturedMix';
 import Header from './Header';
 import Home from './Home';
 import Archive from './Archive';
 import About from './About';
+import Show from './Show';
+import Player from './Player';
 
-//import mix data
 import mixesData from '../data/mixes';
+import actions from '../store/actions';
 
 class App extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      playing: false,
-      currentMix: '',
-      // will equal to the data file of mixes
-      mixIds: mixesData,
-      mix: null,
-      mixes: []
-    };
-  }
-
   fetchMixes = async () => {
-    const {mixIds} = this.state;
-    console.log(mixIds);
+    const {addMix} = this.props;
     // loop over mix ids to fetch each one
-    mixIds.map(async id => {
+    mixesData.map(async id => {
       try {
         const response = await fetch(`https://api.mixcloud.com${id}`);
         const data = await response.json();
-        this.setState((prevState, props) => ({
-          //add our data to end of prev state usign spread operator
-          mixes: [...prevState.mixes, data]
-        }));
+        addMix(data);
       } catch (error) {}
     });
   };
 
-  mountAudio = async () => {
-    this.widget = Mixcloud.PlayerWidget(this.player);
-    await this.widget.ready;
-
-    this.widget.events.pause.on(() =>
-      this.setState({
-        playing: false
-      })
-    );
-    this.widget.events.play.on(() =>
-      this.setState({
-        playing: true
-      })
-    );
-  };
-
   componentDidMount() {
-    // when app component is loaded this gets called and we can be sure
-    // that everything is ready so we can run out mountAudio method
-    this.mountAudio();
     this.fetchMixes();
   }
-
-  actions = {
-    togglePlay: () => {
-      this.widget.togglePlay();
-    },
-
-    playMix: mixName => {
-      //if mixname === current track, then pause track
-      const {currentMix} = this.state;
-      if (mixName === currentMix) {
-        return this.widget.togglePlay();
-      }
-      this.setState({
-        currentMix: mixName
-      });
-      //load new mix by name and start playing
-      this.widget.load(mixName, true);
-    }
-  };
 
   render() {
     //makes variable from frist mix in array
     // given fallback default value {}
-    const [firstMix = {}] = this.state.mixes;
+    // const [firstMix = {}] = this.props.mixes;
 
     return (
       // wrap whole page in router
@@ -93,32 +41,31 @@ class App extends Component {
         <div>
           <div className="flex-l justify-end">
             {/* featuredMix component */}
-            <FeaturedMix {...this.state} {...this.actions} {...firstMix} id={firstMix.key} />
+            <FeaturedMix />
             <div className="w-50-l relative z-1">
               {/* header */}
               <Header />
-
               {/* routed page */}
               {/* pass our state and action down into home component */}
-              <Route exact path="/" render={() => <Home {...this.state} {...this.actions} />} />
-              <Route path="/archive" render={() => <Archive {...this.state} {...this.actions} />} />
-              <Route path="/about" render={() => <About {...this.state} />} />
+              <Route exact path="/" component={Home} />
+              <Route path="/archive" component={Archive} />
+              <Route path="/about" component={About} />
+              <Route
+                path="/show/:slug"
+                // pass in route params to access url on showpage
+                component={Show}
+              />
             </div>
           </div>
           {/* audio player */}
-          <iframe
-            title="audioPlayer"
-            width="100%"
-            height="60"
-            src="https://www.mixcloud.com/widget/iframe/?hide_cover=1&mini=1&feed=%2FNTSRadio%2Ffloating-points-jamie-xx-18th-august-2016%2F"
-            frameBorder="0"
-            className="db fixed bottom-0 z-5"
-            ref={player => (this.player = player)}
-          />
+          <Player />
         </div>
       </Router>
     );
   }
 }
 
-export default App;
+export default connect(
+  state => state,
+  actions
+)(App);
