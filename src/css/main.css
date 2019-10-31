@@ -63,7 +63,7 @@ body {
 }
 
 .loading .play-button {
-  background-image: url('../images/loader.svg');
+  background-image: url('../images/bars.svg');
   background-size: 55% !important;
   background-position-x: center;
 }
